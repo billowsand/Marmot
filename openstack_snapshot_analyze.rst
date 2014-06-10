@@ -5,11 +5,9 @@ OpenStack快照分析
 快照分析
 ========
 
-1. nova.api.ec2.cloud.CloudController
-**create_snapshot**
-2. nova.volumn.cinder.API
-**create_snapshot**
-4. nova.compute.api.API **snapshot**
+#) nova.api.ec2.cloud.CloudController **create_snapshot**
+#) nova.volumn.cinder.API **create_snapshot**
+#) nova.compute.api.API **snapshot**
 
   1. nova.compute.api.API **_create_image**
 
