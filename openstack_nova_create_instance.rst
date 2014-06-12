@@ -59,7 +59,7 @@ OpenStack Nova 虚拟机启动流程分析
 
 
 - nova.virt.images ::
-  **fetch_to_raw->fetch
+  **fetch_to_raw->fetch**
 
 
 
