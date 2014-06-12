@@ -2,9 +2,10 @@
 OpenStack Nova 虚拟机启动流程分析
 ======================
 
-#) nova.api.cloud. *CloudController* ::
+- nova.api.cloud. *CloudController* ::
 
   **run_instance**
+
 
 #) nova.compute.api ::
 
