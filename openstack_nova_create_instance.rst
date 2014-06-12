@@ -13,7 +13,6 @@ OpenStack Nova 虚拟机启动流程分析
 
 
 - nova.conductor.api. *ComputerTaskAPI* ::
-
   **build_instances**
 
 
