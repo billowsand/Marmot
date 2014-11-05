@@ -190,3 +190,38 @@ qemu-img info rbd:data/foo
 
 ### 运行虚拟机
 ```
+qemu -m 1024 -drive format=raw,file=rbd:data/squeeze
+```
+
+设定缓存选项
+```
+qemu -m 1024 -drive format=rbd,file=rbd:data/squeeze,cache=writeback
+```
+
+> 如果设定了rbd_cache=true，必须设置cache=writeback，否则有数据丢失的风险。没有设置cache=writeback，kvm将不会发送刷新请求到librbd。
+
+### 支持丢弃和边界对齐
+
+在Ceph 0.46和kvm 1.1 以后， Ceph块设备支持丢弃操作。时就意味着客户端可以发送TRIM请求让Ceph块设备释放未被使用的空间。这种操作可以通过ext4或者xfs支持。
+
+
+要支持这个选项，需要这样运行虚拟机：
+
+```
+qemu -m 1024 -drive format=raw,file=rbd:data/squeeze,id=drive1,if=none -device driver=ide-hd,drive=drive1,discard_granularity=512
+```
+
+> **注意：**必须使用IDE设备，而不能使用virtio，virtio不支持丢弃操作
+
+如果使用libvirt，需要编辑其xml文件：
+
+```
+<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+        <qemu:commandline>
+                <qemu:arg value='-set'/>
+                <qemu:arg value='block.scsi0-0-0.discard_granularity=4096'/>
+                <qemu:arg value='-set'/>
+                <qemu:arg value='block.scsi0-0-1.discard_granularity=65536'/>
+        </qemu:commandline>
+</domain>
+```
