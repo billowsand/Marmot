@@ -151,5 +151,42 @@ rbd flatten rbd/my-image
 > **注意：**合并的镜像会占据更多的存储空间。
 
 
+## 在KVM中使用Ceph块设备
+最常见的Ceph的块设备使用案例包括提供虚拟机设备镜像。例如，用户会创建一个主镜像安装了操作系统和相关软件并且已经配置好。之后，用户创建一个快照。最后通过克隆这个快照使用虚拟机。这种方式可以用来快速部署虚拟机。因为客户端不需要每次下载整个镜像。
+
+![Ceph kvm](http://ceph.com/docs/master/_images/ditaa-4733472b605d45db3caa492c9fa5900204396a2b.png)
+
+Ceph的块设备能够集成在kvm的虚拟机中。
 
 
+### 使用方法
+
+kvm的命令行会指定存储池的名称和镜像的名称。也可以制定一个快照的名称。
+
+kvm将会从默认的位置获取ceph的配置参数(/etc/ceph/$cluter.conf)。 
+
+```
+qemu-img {command} [options] rbd:glance-pool/maipo:id=glance:conf=/etc/ceph/ceph.conf
+```
+
+### 创建镜像
+
+```
+qemu-img create -f raw rbd:data/foo 10G
+```
+
+> **重要：** RAW格式是RBD原生支持的格式，qcow2和vmdk将会带来更大的开销，并且在虚拟机迁移时带来不安全。
+
+### 改变大小
+
+```
+qemu-img resize rbd:data/foo 10G
+```
+
+### 获取镜像信息
+```
+qemu-img info rbd:data/foo
+```
+
+### 运行虚拟机
+```
