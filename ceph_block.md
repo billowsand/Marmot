@@ -69,3 +69,26 @@ rbd --pool rbd snap create --snap snapname foo
 rbd snap create rbd/foo@snapname
 ```
 
+#### 快照回滚
+
+```
+rbd --pool rbd snap rollback --snap snapname foo
+rbd snap rollback rbd/foo@snapname
+```
+
+> **注意：**回滚快照就是将当前镜像的数据用快照重新替换。回滚的执行时间随着镜像大小的增加而增加。克隆将会比回滚快照更花时间。
+
+
+### 分层快照
+
+Ceph支持创建许多copy-on-write(COW)的克隆快照。 分层快照支持Ceph快设备的客户端快速创建镜像。例如，你可能创建了一个虚拟机的镜像并写入了一些数据。然后，做一个快照，保护这个快照，按照需要创建许多copy-on-write的克隆。一个快照是只读的，所以克隆快照语义上的简化让克隆的速度很快。
+
+![Ceph COW](http://ceph.com/docs/master/_images/ditaa-b4c8b30123e5581e44b87f1836b96a869c4898b6.png)
+
+> **笔记**：Parent和Child意味着一个snapshot是parent，克隆镜像是child。
+
+
+每一个child存储着一个与之相关的parent镜像，能够让克隆镜像打开parent快照并从中读数据。
+
+一个COW的克隆快照的表现形式是一个Ceph的块设备。你可以读、写、克隆和调整镜像的大小。对克隆的惊喜nag并没有更多的限制，但是克隆镜像依赖于一个之前的快照，所以你必须在克隆镜像之前保护快照。下面的图表描述了这个过程。
+
