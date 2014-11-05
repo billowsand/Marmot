@@ -225,3 +225,4 @@ qemu -m 1024 -drive format=raw,file=rbd:data/squeeze,id=drive1,if=none -device d
         </qemu:commandline>
 </domain>
 ```
+
