@@ -102,6 +102,54 @@ Ceph的分层快设备是一个简单的过程。你必须首先有一个镜像�
 
 克隆镜像必须制定一个parent快照，包括这个快照所在的pool ID、image ID和snapshot ID。包含pool ID意味着可以从另外一个pool中克隆快照。
 
-1. **镜像模版：** 一种通用的使用分层快照的方法是创建一个主镜像和一个快照提供克隆的模版。例如，一个用户可以创建一个Linux发行版的镜像
-2. 
-1. 
+1. **镜像模版：** 一种通用的使用分层快照的方法是创建一个主镜像和一个快照提供克隆的模版。例如，一个用户可以创建一个Linux发行版的镜像，安装完成后生成一个快照。之后对快照进行保护后克隆快照。
+2. **扩展模版：** 一种更为高级的方式制作模版。例如，一个用户可能克隆了一个镜像并且安装了其他软件（例如数据库等），之后对这个镜像做快照。之后这个镜像又变成了一个新的基本镜像。 
+1. **模版池：** 一种使用分层块设备的方法是创建一个存储池包括主镜像，并进行各种快照扩展，用户可以以只读方式访问这个模版池。
+2. **镜像迁移和恢复** 还有一种使用分层块设备的方法就是用于从不同的镜像池中迁移或者恢复数据
+
+#### 分层快照
+
+克隆镜像需要访问parent快照，如果用户无意中删除了parent快照，所有的克隆将会无法恢复，所以克隆之前必须重新保护快照。
+
+```
+rbd --pool rbd snap protect --image my-image --snap my-snapshot
+rbd snap protect rbd/my-image@my-snapshot
+```
+
+> 被保护的快照不可以删除
+
+#### 克隆快照
+
+```
+rbd clone rbd/my-image@my-snapshot rbd/new-image
+```
+
+> 你可以从一个存储池克隆快照到另一个存储池。例如，你可以修复一个只读的镜像，并且在一个存储池做一个快照模版。在另一个存储池中克隆。
+
+#### 取消保护快照
+
+```
+rbd --pool rbd snap unprotect --image my-image --snap my-snapshot
+rbd snap unprotect rbd/my-image@my-snapshot
+```
+
+#### 列出快照的儿子
+
+```
+rbd --pool rbd children --image my-image --snap my-snapshot
+rbd children rbd/my-image@my-snapshot
+```
+
+#### 合并镜像
+克隆镜像存在依赖关系。取消这种依赖关系叫做合并镜像。合并镜像花费的时间和镜像的大小成正比。 要删除一个快照模版，必须先合并子镜像。
+
+```
+rbd --pool rbd flatten --image my-image
+rbd flatten rbd/my-image
+```
+
+> **注意：**合并的镜像会占据更多的存储空间。
+
+
+
+
